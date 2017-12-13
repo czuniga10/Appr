@@ -4,7 +4,7 @@ const baseURL = '/api/project';
 
 function createProjectFeature(projectid, body) {
     return axios
-        .post(`${baseURL}/${projectid}/create`, body)
+        .post(`${baseURL}/${projectid}/create/feature`, body)
         .then(res => res)
         .catch(err => {throw err});
 }
@@ -25,7 +25,7 @@ function findProjectFeature(projectid, featureid) {
 
 function updateProjectFeature(projectid, featureid, body){
     return axios
-        .put(`${baseURL}/${projectid}/update/feature/${featureid}`)
+        .put(`${baseURL}/${projectid}/update/feature/${featureid}`, body)
         .then(res => res)
         .catch(err => {throw err});
 }

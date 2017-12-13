@@ -8,7 +8,7 @@ projectFeatureRouter.post('/:projectid/create/feature', (req, res) => {
     const { featureData } = req.body;
     const db = getDb();
     db.create_project_feature([ projectid, featureData] )
-        .then(promise => res.send())
+        .then(feature => res.send(feature))
         .catch(err => res.status(500).send(err));
 });
 

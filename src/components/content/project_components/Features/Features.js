@@ -11,14 +11,14 @@ class Features extends Component {
     this.state={
         features: []
       }
-      this.handleAddField = this.handleAddField.bind(this);
-      this.handleChangeField = this.handleChangeField.bind(this);
-      // this.submitChangeField = this.submitChangeField.bind(this);
-      this.handleDeleteField = this.handleDeleteField.bind(this);
+
+      this.handleAddFeatureButton = this.handleAddFeatureButton.bind(this);
+      this.handleChangeFeature = this.handleChangeFeature.bind(this);
+      this.handleDeleteFeatureButton= this.handleDeleteFeatureButton.bind(this);
   }
 
 componentWillMount() {
-  const projectid = this.props.match.params.projectid
+  const projectid = this.props.match.params.projectid || 1;
   const featureExamples = [
     {feature_data: 'example: Force Sensitivity'},
     {feature_data: 'example: Galactic Security'}
@@ -41,83 +41,79 @@ componentWillMount() {
     .catch(err => {throw err});
 }
 
-handleAddField(field) {
+handleAddFeatureButton() {
   const projectid = this.props.match.params.projectid || 1;
-  let body = {viewData: ''};
-  const newState = this.state[field];
-
-  if (field === 'features') {
-    body = {featureData: ''};
-    newState.push(body);
-    this.setState({ features: newState });
-
-    createProjectFeature(projectid, body)
-        .then(res => {
-            if (res.status !== 200) {
-                console.log(res);
-            }
-        })
-        .catch(err => {throw err});
+  const reqBody = {
+    featureData: ''
   }
+
+
+  createProjectFeature( projectid, reqBody )
+      .then(res => {
+          if(res.status !== 200) {
+            console.log(res);
+          } else {
+             const newState = this.state.features;
+             newState.push(res.data[0]);
+             this.setState({ features: newState });
+          }
+      })
+      .catch(err => {throw err});
 }
 
-handleChangeField(e, field, index) {
-  const key = e.target.name;
-  const value = e.target.value;
-  const newState = this.state[field];
-  newState[index][key] = value;
-  this.setState({ [field]: newState });
+handleChangeFeature(e, index, field) {
+  const newState = this.state.features;
+  newState[index][field] = e.target.value;
+  this.setState({ features: newState });
 }
 
-// submitChangeField(e, field, index) {
-//   const key = e.target.name;
-//   const projectid = this.props.match.params.projectid
-//   const id = Number(e.target.id);
-//   const body = this.state[field][index];
+submitChangeFeature(e, index) {
+  const projectid = this.props.match.params.projectid;
+  const featureid = Number(e.target.id);
+  const {feature_data} = this.state.features[index];
+  const reqBody = {
+    featureData: feature_data
+  }
 
-//   if (field === 'features') {
-//       updateProjectFeature(projectid, id, body)
-//       .then(res => {
-//           if (res.status !== 200) {
-//               console.log(res);
-//           }
-//       })
-//       .catch(err => {throw err});
-//   }
-// }
+  updateProjectFeature(projectid, featureid, reqBody)
+      .then(res => {
+          if(res.status !== 200) {
+              console.log(res);
+          }
+      })
+      .catch(err => {throw err});
+}
 
-handleDeleteField(e, field, index) {
-  const projectid = this.props.match.params.projectid
-  const id = Number(e.target.id);
-  const newState = this.state[field];
+handleDeleteFeatureButton(e, index) {
+  const projectid = Number(this.props.match.params.projectid);
+  const featureid = Number(e.target.id);
+  const newState = this.state.features;
   newState.splice(index, 1);
-  this.setState({ [field]: newState });
+  this.setState({ features: newState });
 
-  if (field === 'features') {
-      deleteProjectFeature(projectid, id)
-          .then(res => {
-              if (res.status !== 200) {
-                  console.log(res);
-              }
-          })
-          .catch(err => {throw err});
-  }
+  deleteProjectFeature(projectid, featureid)
+      .then(res => {
+          if(res.status !== 200) {
+              console.log(res);
+          }
+      })
+      .catch(err => {throw err});
 }
+
 
   render() {
     const features = this.state.features;
 
     const displayFeatures = features.map( feature => {
-      const field = 'features';
       const index = features.indexOf(feature);
       return(
           <div className="features-item" key={`feature-${index}`}>
               <section>
                   <label>{(index + 1) + '.'}</label>
-                  <input id={feature.id} name="feature_data" value={feature.feature_data} onChange={e => this.handleChangeField(e, field, index)}/>
+                  <input id={feature.id} name="feature_data" value={feature.feature_data} onChange={e => this.handleChangeFeature(e, index)}/>
               </section>
-              <button className="not-enough-info-btn" id={feature.id} onClick={e => this.submitChangeField(e, field, index)}> Save </button>
-              <span className="delete-x" id={feature.id} onClick={e => this.handleDeleteField(e, field, index)}> &times; </span>
+              <button id={feature.id} onClick={e => this.submitChangeFeature(e, index)}> Save </button>
+              <button className="delete-x" id={feature.id} onClick={e => this.handleDeleteFeatureButton(e, index)}> &times; </button>
           </div>
       );
   });
@@ -140,7 +136,7 @@ handleDeleteField(e, field, index) {
 
                         </div>
                         <div className="features-footer">
-                              <button className="add-button" onClick={() => this.handleAddField('features')}> <span/>  Add Feature </button>
+                              <button className="add-button" onClick={this.handleAddFeatureButton}> <span/>  Add Feature </button>
                         </div>
                       </div>
                     </div>
